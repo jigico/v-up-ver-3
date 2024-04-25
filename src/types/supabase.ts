@@ -83,6 +83,7 @@ export type Database = {
           boardTitle: string
           content: string
           date: string
+          likeCount: number | null
           likeList: string[]
           musicId: string
           userId: string
@@ -92,6 +93,7 @@ export type Database = {
           boardTitle?: string
           content?: string
           date?: string
+          likeCount?: number | null
           likeList: string[]
           musicId?: string
           userId?: string
@@ -101,6 +103,7 @@ export type Database = {
           boardTitle?: string
           content?: string
           date?: string
+          likeCount?: number | null
           likeList?: string[]
           musicId?: string
           userId?: string
@@ -244,17 +247,17 @@ export type Database = {
       playlistCurrent: {
         Row: {
           currentId: string
-          currentMusicIds: string[] | null
+          currentMusicIds: Json[] | null
           userId: string
         }
         Insert: {
           currentId?: string
-          currentMusicIds?: string[] | null
+          currentMusicIds?: Json[] | null
           userId?: string
         }
         Update: {
           currentId?: string
-          currentMusicIds?: string[] | null
+          currentMusicIds?: Json[] | null
           userId?: string
         }
         Relationships: [

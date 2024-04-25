@@ -24,15 +24,10 @@ export const getUserUid = async (email: string) => {
 
 export const findUserPassword = async (spendEmail: string) => {
   let { data, error } = await supabase.auth.resetPasswordForEmail(spendEmail, {
-    redirectTo: 'http://localhost:3000/new-password',
+    redirectTo: 'https://vvv-fawn.vercel.app/new-password',
   })
-  if (!data) {
-    console.log(error)
-    alert('이메일을 다시 입력해주세요!')
-    return
-  }
 
-  return data
+  return { data, error }
 }
 
 export const getUserUidProviderUserInfo = async (email: string) => {
@@ -59,11 +54,17 @@ export const updateUserPassword = async (newPassword: string) => {
   const { data, error } = await supabase.auth.updateUser({
     password: newPassword,
   })
-  if (!data || error) {
-    console.log(error)
-    alert('비밀번호를 다시 입력해주세요!')
-    return
+
+  if (error) {
+    if (error.code == '23505') {
+      alert('이미 존재하는 이메일입니다.')
+      throw new Error('이미 존재하는 이메일입니다.')
+    }
   }
 
-  return data
+  if (!error) {
+    throw new Error('비밀번호를 다시 입력해주세요!')
+  }
+
+  return { data, error }
 }

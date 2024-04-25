@@ -1,6 +1,6 @@
 'use client'
 
-import React, { FormEvent, useState } from 'react'
+import React, { FormEvent, useRef, useState } from 'react'
 import { updateUserPassword } from '@/shared/login/loginApi'
 import { useRouter } from 'next/navigation'
 import {
@@ -11,8 +11,11 @@ import {
   OPEN_ANOTHER_SHADOW,
 } from '../login/loginCss'
 import { ACTIVE_BUTTON_SHADOW } from '../login/buttonCss'
+import Swal from 'sweetalert2'
+import { validateDetailPw } from '../join/value'
 
 const FindPassword = () => {
+  const refNewPassword = useRef<HTMLInputElement>(null)
   const [newPassword, setNewPassword] = useState<string>('')
   const [updateState, setUpdateState] = useState<boolean>(false)
   const blankPattern = /[\s]/g
@@ -28,6 +31,17 @@ const FindPassword = () => {
       alert('비밀번호에 공백은 사용할 수 없습니다.')
       return
     }
+    if (!validateDetailPw.test(newPassword)) {
+      await Swal.fire({
+        text: '비밀번호는 6자 이상, 숫자, 소문자를 모두 포함해야 합니다.',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#685BFF',
+        color: '#ffffff',
+        background: '#2B2B2B',
+      })
+      refNewPassword.current?.focus()
+      return
+    }
 
     try {
       if (newPassword) {
@@ -35,7 +49,14 @@ const FindPassword = () => {
         setNewPassword('')
 
         if (data) {
-          alert('비밀번호를 변경했습니다!')
+          await Swal.fire({
+            text: '비밀번호를 변경했습니다!',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#685BFF',
+            color: '#ffffff',
+            background: '#2B2B2B',
+          })
+          setUpdateState(true)
           router.push('/login')
         }
       }
@@ -67,10 +88,20 @@ const FindPassword = () => {
                   id='password'
                   type='password'
                   value={newPassword}
+                  ref={refNewPassword}
+                  onFocus={() => setUpdateState(false)}
                   placeholder='새 비밀번호를 입력해 주세요.'
                   onChange={(e) => setNewPassword(e.target.value)}
                   className={`flex w-full items-center gap-4 rounded-[12px] border-2 border-white border-opacity-10 bg-white bg-opacity-10 px-[12px] py-[13px] text-[16px] font-bold caret-primary  ${INPUT_SHADOW} ${DROP_SHADOW} ${INPUT_FOCUS} placeholder:text-[rgba(255,255,255,0.3)]`}
                 />
+                <div>
+                  {!validateDetailPw.test(newPassword) &&
+                  newPassword?.length > 0 ? (
+                    <p className='w-[320px] text-primary'>
+                      비밀번호는 6자 이상, 숫자, 소문자를 모두 포함해야 합니다.
+                    </p>
+                  ) : null}
+                </div>
               </div>
             </div>
             <button

@@ -7,6 +7,7 @@ import {
   addLikedUser,
   getClickLikedUser,
   removeLikedUser,
+  updateLikeCountInCommunity,
 } from '@/shared/communitydetail/detailApi'
 import { Props } from '@/types/communityDetail/detailTypes'
 import emptyHeart from '@/../public/images/heart-rounded-gray.svg'
@@ -17,6 +18,8 @@ const LikeButton = ({ boardId }: Props) => {
   const uid = userSessionInfo?.user.uid
   const [like, setLike] = useState<boolean | null>(null)
   const [likeList, setLikeList] = useState<string[]>([])
+  const [likeCount, setLikeCount] = useState<number>(0)
+
   const likeLength =
     likeList && likeList.length > 99 ? 99 : likeList ? likeList.length : 0
   const likePlusCondition =
@@ -25,18 +28,17 @@ const LikeButton = ({ boardId }: Props) => {
   useEffect(() => {
     const likedStatus = async () => {
       const clickLikedUser = await getClickLikedUser(boardId)
+      const likeList = clickLikedUser?.likeList
 
-      if (
-        uid &&
-        clickLikedUser &&
-        clickLikedUser?.likeList &&
-        clickLikedUser.likeList.includes(uid)
-      ) {
+      if (uid && clickLikedUser && likeList && likeList.includes(uid)) {
         setLike(true)
       } else {
         setLike(false)
       }
-      setLikeList(clickLikedUser?.likeList || [])
+      setLikeList(likeList || [])
+      if (likeList) {
+        setLikeCount(likeList.length || 0)
+      }
     }
 
     likedStatus()
@@ -48,14 +50,20 @@ const LikeButton = ({ boardId }: Props) => {
       return
     }
 
-    if (like) {
+    if (like && likeList) {
+      const updatedLikeList = likeList && likeList.filter((id) => id !== uid)
       await removeLikedUser(likeList, boardId, uid)
       setLike(false)
-      setLikeList((prevLikeList) => prevLikeList.filter((id) => id !== uid))
+      setLikeList(updatedLikeList)
+      setLikeCount(updatedLikeList.length)
+      await updateLikeCountInCommunity(boardId, updatedLikeList.length)
     } else {
+      const updatedLikeList = [...likeList, uid]
       await addLikedUser(likeList, boardId, uid)
       setLike(true)
-      setLikeList((prevLiketest) => [...prevLiketest, uid])
+      setLikeList(updatedLikeList)
+      setLikeCount(updatedLikeList.length)
+      await updateLikeCountInCommunity(boardId, updatedLikeList.length)
     }
     const updatedLikeList = like
       ? likeList.filter((id) => id !== uid)
@@ -63,7 +71,6 @@ const LikeButton = ({ boardId }: Props) => {
     setLikeList(updatedLikeList)
     setLike(!like)
   }
-
   return (
     <div>
       <div className='flex gap-[7px]'>

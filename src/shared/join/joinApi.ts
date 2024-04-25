@@ -34,10 +34,9 @@ export const saveSignUpInUserInfo = async ({
     .select()
 
   if (error) {
-    console.error(error)
     if (error.code == '23505') {
-      alert('이미 있는 이메일입니다.')
-      throw new Error('이미 있는 이메일입니다.')
+      alert('이미 존재하는 이메일입니다.')
+      throw new Error('이미 존재하는 이메일입니다.')
     }
   }
   return data
@@ -48,7 +47,6 @@ export const getSignUpUserList = async () => {
     .from('userInfo')
     .select('*')
   if (signUpUserListError) {
-    console.error(signUpUserListError)
     throw new Error('오류로 인해 정보를 가져오지 못 하고 있습니다')
   }
   return signUpUserList

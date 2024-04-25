@@ -18,6 +18,8 @@ import allowCheck from '@/../public/images/allow-check-box.svg'
 import { ACTIVE_BUTTON_SHADOW } from '../login/buttonCss'
 import AllowUserInfo from './AllowUserInfo'
 import useInput from '@/hooks/useInput'
+import Swal from 'sweetalert2'
+import { blankPattern, validateDetailPw, validateEmail } from './value'
 
 const Join = () => {
   const refPassword = useRef<HTMLInputElement>(null)
@@ -38,11 +40,9 @@ const Join = () => {
 
   const { userEmail, userPw, userPwCheck, userNickname, checkAgree } = join
 
-  const blankPattern = /[\s]/g
   const validateCheckAgree = checkAgree
   const validatePassword = !(userPw === userPwCheck)
   const validateEmptyValue = !(userEmail || userPwCheck || userNickname)
-  const validateDetailPw = /^(?=.*?[a-z])(?=.*?[0-9]).{6,}$/
 
   const onClickCheckboxHandler = () => {
     setJoin((prevForm) => ({ ...prevForm, checkAgree: !prevForm.checkAgree }))
@@ -57,42 +57,69 @@ const Join = () => {
       blankPattern.test(userPw) == true ||
       blankPattern.test(userPwCheck) == true
     ) {
-      alert('비밀번호에 공백은 사용할 수 없습니다.')
+      await Swal.fire({
+        text: '비밀번호에 공백은 사용할 수 없습니다.',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#685BFF',
+        color: '#ffffff',
+        background: '#2B2B2B',
+      })
       return
     }
 
     if (validateEmptyValue || userEmailBlank === '') {
-      alert('빈칸 없이 작성해 주세요.')
+      await Swal.fire({
+        text: '빈칸 없이 작성해 주세요.',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#685BFF',
+        color: '#ffffff',
+        background: '#2B2B2B',
+      })
       return
     }
 
     if (!validateDetailPw.test(userPw)) {
-      alert('비밀번호는 6자 이상, 숫자, 소문자를 모두 포함해야 합니다.')
+      await Swal.fire({
+        text: '비밀번호는 6자 이상, 숫자, 소문자를 모두 포함해야 합니다.',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#685BFF',
+        color: '#ffffff',
+        background: '#2B2B2B',
+      })
       refPassword.current?.focus()
       return
     }
 
     if (validatePassword || userPwBlank === '') {
-      alert('비밀번호를 다시 입력해주세요.')
+      await Swal.fire({
+        text: '비밀번호를 다시 입력해주세요.',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#685BFF',
+        color: '#ffffff',
+        background: '#2B2B2B',
+      })
       return
     }
 
     if (validateCheckAgree === false) {
-      alert('약관 동의는 필수입니다')
+      await Swal.fire({
+        text: '약관 동의는 필수입니다',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#685BFF',
+        color: '#ffffff',
+        background: '#2B2B2B',
+      })
       return
     }
 
-    let signUpResult = await signUp({
+    let { data, error } = await signUp({
       email: userEmail,
       password: userPw,
     })
 
-    const userId = signUpResult?.data?.user?.id
+    const userId = data?.user?.id
 
-    if (!userId) {
-      alert('이미 존재하는 이메일 입니다.')
-      return
-    } else {
+    if (userId) {
       await saveSignUpInUserInfo({
         userId,
         email: userEmail,
@@ -100,24 +127,52 @@ const Join = () => {
         nickname: userNickname,
         userType: 0,
       })
-      alert('V-UP에 오신 걸 환영합니다!')
+
+      await Swal.fire({
+        text: 'V-UP에 가입되셨습니다',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#685BFF',
+        color: '#ffffff',
+        background: '#2B2B2B',
+      })
       router.push('/login')
     }
 
-    if (signUpResult) {
+    if (data) {
       if (
-        signUpResult.data?.user?.identities?.length === 0 ||
-        (signUpResult.error && signUpResult.error.status === 422)
+        data?.user?.identities?.length === 0 ||
+        (error && error.status === 422)
       ) {
-        alert('이미 존재하는 이메일입니다.')
+        await Swal.fire({
+          text: '이미 존재하는 이메일입니다.',
+          confirmButtonText: '확인',
+          confirmButtonColor: '#685BFF',
+          color: '#ffffff',
+          background: '#2B2B2B',
+        })
         return
       }
 
-      if (signUpResult.error) {
-        const error = signUpResult.error
+      if (error) {
+        const errorStatus = error.status
+        if (errorStatus === 400) {
+          await Swal.fire({
+            text: '올바른 이메일 형식이 아닙니다. 다시 입력해주세요.',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#685BFF',
+            color: '#ffffff',
+            background: '#2B2B2B',
+          })
+        }
 
         if (error.message === 'Email rate limit exceeded') {
-          alert('잦은 요청으로 잠시 후에 다시 시도 해주세요.')
+          await Swal.fire({
+            text: '잠시 후에 다시 시도 해주세요.',
+            confirmButtonText: '확인',
+            confirmButtonColor: '#685BFF',
+            color: '#ffffff',
+            background: '#2B2B2B',
+          })
           return
         }
       }
@@ -150,6 +205,14 @@ const Join = () => {
                     className={`flex w-full items-center gap-4 rounded-[12px] border-2 border-white border-opacity-10 bg-white bg-opacity-10 px-[12px] py-[13px] font-bold caret-primary  ${INPUT_SHADOW} ${DROP_SHADOW} ${INPUT_FOCUS} placeholder:text-[rgba(255,255,255,0.3)]`}
                   />
                 </label>
+                <div>
+                  {!validateEmail.test(userEmail) && userEmail?.length > 0 ? (
+                    <p className='text-primary'>
+                      올바른 이메일 형식이 아닙니다. @와 .을 포함하여 작성해
+                      주세요.
+                    </p>
+                  ) : null}
+                </div>
 
                 <label htmlFor='password' className='flex flex-col'>
                   <p>비밀번호</p>
