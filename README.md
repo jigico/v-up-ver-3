@@ -61,6 +61,8 @@
 
 **프로젝트 명** : V-UP (Volume Up, 불륨업)
 
+**배포 링크** : https://re-v-up-ver-3.vercel.app/
+
 **팀 노션** : [V-UP (Volume Up, 불륨업)](https://www.notion.so/VakVakVerse-16f2aa0964ad45f4b09dee8683b39c23)
 
 **발표 자료** : https://www.canva.com/design/DAGDnKcIjGI/oBJswMRAhDifvn7f2FFMRQ/view?utm_content=DAGDnKcIjGI&utm_campaign=designshare&utm_medium=link&utm_source=editor
