@@ -4,6 +4,7 @@ import './globals.css'
 import QueryProvider from './provider'
 import { FontClassNames } from '@/util/font'
 import Container from '@/components/common/Container'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 export const metadata: Metadata = {
   title: 'V-UP',
@@ -39,6 +40,7 @@ export default function RootLayout({
           <NextAuthProvider>
             <Container>{children}</Container>
           </NextAuthProvider>
+          <ReactQueryDevtools initialIsOpen={false} />
         </body>
       </html>
     </QueryProvider>
